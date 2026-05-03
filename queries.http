@@ -1,1 +1,162 @@
-### Kreiranje indeksa knjigePUT /knjige{  "settings": {    "analysis": {      "analyzer": {        "hrvatski_analyzer": {          "tokenizer": "standard",          "filter": [            "lowercase",            "asciifolding"          ]        }      }    }  },  "mappings": {    "properties": {      "naslov": {        "type": "text",        "analyzer": "hrvatski_analyzer",        "fields": {          "keyword": {            "type": "keyword"          }        }      },      "autor": { "type": "keyword" },      "zanr": { "type": "keyword" },      "opis": {        "type": "text",        "analyzer": "hrvatski_analyzer"      },      "godina": { "type": "integer" },      "cijena": { "type": "double" },      "dostupno": { "type": "boolean" }    }  }}### Bulk unos knjigaPOST /knjige/_bulk{ "index": { "_id": "1" } }{ "naslov": "Na Drini ćuprija", "autor": "Ivo Andrić", "zanr": "roman", "opis": "Povijesni roman o mostu, ljudima i vremenu.", "godina": 1945, "cijena": 18.50, "dostupno": true }{ "index": { "_id": "2" } }{ "naslov": "Derviš i smrt", "autor": "Meša Selimović", "zanr": "roman", "opis": "Filozofski roman o vlasti, pravdi i ljudskoj sudbini.", "godina": 1966, "cijena": 22.00, "dostupno": true }{ "index": { "_id": "3" } }{ "naslov": "Tvrđava", "autor": "Meša Selimović", "zanr": "roman", "opis": "Roman o čovjeku, društvu i borbi za smisao.", "godina": 1970, "cijena": 20.00, "dostupno": false }{ "index": { "_id": "4" } }{ "naslov": "Travnička hronika", "autor": "Ivo Andrić", "zanr": "povijesni roman", "opis": "Priča o diplomatskom i društvenom životu u Travniku.", "godina": 1942, "cijena": 19.90, "dostupno": true }{ "index": { "_id": "5" } }{ "naslov": "Zločin i kazna", "autor": "Fjodor Dostojevski", "zanr": "roman", "opis": "Psihološki roman o krivnji, savjesti i iskupljenju.", "godina": 1866, "cijena": 24.50, "dostupno": true }### Provjera broja dokumenataGET /knjige/_count### Match – naslovGET /knjige/_search{  "query": {    "match": { "naslov": "cuprija" }  }}### Match – opisGET /knjige/_search{  "query": {    "match": { "opis": "pravda sudbina" }  }}### Term – autorGET /knjige/_search{  "query": {    "term": { "autor": "Ivo Andrić" }  }}### Range – godinaGET /knjige/_search{  "query": {    "range": {      "godina": { "gte": 1950 }    }  }}### BoolGET /knjige/_search{  "query": {    "bool": {      "must": [        { "match": { "opis": "roman" } }      ],      "filter": [        { "term": { "dostupno": true } },        { "range": { "cijena": { "lte": 22 } } }      ]    }  }}### AnalyzePOST /knjige/_analyze{  "analyzer": "hrvatski_analyzer",  "text": "Na Drini ćuprija"}### AgregacijeGET /knjige/_search{  "size": 0,  "aggs": {    "po_autoru": {      "terms": { "field": "autor" }    }  }}### Kreiranje filmoviPUT /filmovi{  "settings": {    "analysis": {      "analyzer": {        "hrvatski_analyzer": {          "tokenizer": "standard",          "filter": ["lowercase", "asciifolding"]        }      }    }  },  "mappings": {    "properties": {      "naslov": { "type": "text" },      "redatelj": { "type": "keyword" },      "zanr": { "type": "keyword" },      "opis": { "type": "text" },      "godina": { "type": "integer" },      "ocjena": { "type": "double" },      "dostupno": { "type": "boolean" }    }  }}### Bulk filmoviPOST /filmovi/_bulk{ "index": { "_id": "1" } }{ "naslov": "Deadpool", "redatelj": "Tim Miller", "zanr": "sci-fi", "opis": "Superhero film", "godina": 2016, "ocjena": 8.0, "dostupno": true }### Match filmoviGET /filmovi/_search{  "query": {    "match": { "opis": "borba" }  }}
+### Kreiranje indeksa knjige
+PUT /knjige
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "hrvatski_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "naslov": {
+        "type": "text",
+        "analyzer": "hrvatski_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "autor": { "type": "keyword" },
+      "zanr": { "type": "keyword" },
+      "opis": {
+        "type": "text",
+        "analyzer": "hrvatski_analyzer"
+      },
+      "godina": { "type": "integer" },
+      "cijena": { "type": "double" },
+      "dostupno": { "type": "boolean" }
+    }
+  }
+}
+
+### Bulk unos knjiga
+POST /knjige/_bulk
+{ "index": { "_id": "1" } }
+{ "naslov": "Na Drini ćuprija", "autor": "Ivo Andrić", "zanr": "roman", "opis": "Povijesni roman o mostu, ljudima i vremenu.", "godina": 1945, "cijena": 18.50, "dostupno": true }
+{ "index": { "_id": "2" } }
+{ "naslov": "Derviš i smrt", "autor": "Meša Selimović", "zanr": "roman", "opis": "Filozofski roman o vlasti, pravdi i ljudskoj sudbini.", "godina": 1966, "cijena": 22.00, "dostupno": true }
+{ "index": { "_id": "3" } }
+{ "naslov": "Tvrđava", "autor": "Meša Selimović", "zanr": "roman", "opis": "Roman o čovjeku, društvu i borbi za smisao.", "godina": 1970, "cijena": 20.00, "dostupno": false }
+{ "index": { "_id": "4" } }
+{ "naslov": "Travnička hronika", "autor": "Ivo Andrić", "zanr": "povijesni roman", "opis": "Priča o diplomatskom i društvenom životu u Travniku.", "godina": 1942, "cijena": 19.90, "dostupno": true }
+{ "index": { "_id": "5" } }
+{ "naslov": "Zločin i kazna", "autor": "Fjodor Dostojevski", "zanr": "roman", "opis": "Psihološki roman o krivnji, savjesti i iskupljenju.", "godina": 1866, "cijena": 24.50, "dostupno": true }
+
+### Provjera broja dokumenata
+GET /knjige/_count
+
+### Match – naslov
+GET /knjige/_search
+{
+  "query": {
+    "match": { "naslov": "cuprija" }
+  }
+}
+
+### Match – opis
+GET /knjige/_search
+{
+  "query": {
+    "match": { "opis": "pravda sudbina" }
+  }
+}
+
+### Term – autor
+GET /knjige/_search
+{
+  "query": {
+    "term": { "autor": "Ivo Andrić" }
+  }
+}
+
+### Range – godina
+GET /knjige/_search
+{
+  "query": {
+    "range": {
+      "godina": { "gte": 1950 }
+    }
+  }
+}
+
+### Bool
+GET /knjige/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "opis": "roman" } }
+      ],
+      "filter": [
+        { "term": { "dostupno": true } },
+        { "range": { "cijena": { "lte": 22 } } }
+      ]
+    }
+  }
+}
+
+### Analyze
+POST /knjige/_analyze
+{
+  "analyzer": "hrvatski_analyzer",
+  "text": "Na Drini ćuprija"
+}
+
+### Agregacije
+GET /knjige/_search
+{
+  "size": 0,
+  "aggs": {
+    "po_autoru": {
+      "terms": { "field": "autor" }
+    }
+  }
+}
+
+### Kreiranje filmovi
+PUT /filmovi
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "hrvatski_analyzer": {
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "naslov": { "type": "text" },
+      "redatelj": { "type": "keyword" },
+      "zanr": { "type": "keyword" },
+      "opis": { "type": "text" },
+      "godina": { "type": "integer" },
+      "ocjena": { "type": "double" },
+      "dostupno": { "type": "boolean" }
+    }
+  }
+}
+
+### Bulk filmovi
+POST /filmovi/_bulk
+{ "index": { "_id": "1" } }
+{ "naslov": "Deadpool", "redatelj": "Tim Miller", "zanr": "sci-fi", "opis": "Superhero film", "godina": 2016, "ocjena": 8.0, "dostupno": true }
+
+### Match filmovi
+GET /filmovi/_search
+{
+  "query": {
+    "match": { "opis": "borba" }
+  }
+}
